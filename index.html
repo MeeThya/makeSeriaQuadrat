@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * {
+    font-family: sans-serif;
+  }
+  textarea {
+    box-sizing: border-box;
+  }
+  table {
+    border-collapse: collapse;
+  }
+  td {
+    border: 1px solid black;
+    padding: 1px;
+  }
+</style>
+<body>
+  <textarea id="str" cols=50 rows=6 oninput="makeresult()" placeholder="Набери серию!"></textarea><textarea id="res" cols=50 rows=6 readonly style="resize:none; font-family:monospace;" placeholder="Тут будет серийный квадрат текстом"></textarea>
+  <br>
+  Тут будет серийный квадрат таблицей.
+  <br>
+  <table id="tabb"></table>
+  <br>
+  Допускаются ноты: c cis des d dis es e f fis ges g gis as a ais b h
+  <br>
+  Последовательность пишется через пробел.
+  <br>
+  Например: e f g des ges es as d h c a b
+</body>
+<script>
+  let E = (id)=>document.getElementById(id);
+  let V = (id)=>E(id).value;
+  let whereismouse = null;
+  function makeresult(){
+    let qu = toquadrat(V("str"));
+    E("res").value = totxt(qu);
+    E("tabb").innerHTML = totable(qu);
+  }
+  function whenMove(){
+    E("res").style.width = E("str").offsetWidth+"px";
+    E("res").style.height = E("str").offsetHeight+"px";
+  }
+  function whenMoveAtStr(){
+    whereismouse = "str";
+  }
+  function whenMoveAtRes(){
+    whereismouse = "res";
+  }
+  window.addEventListener("mousemove", whenMove);
+  window.addEventListener("touchmove", whenMove);
+  E("str").addEventListener("mousemove", whenMoveAtStr);
+  E("str").addEventListener("touchmove", whenMoveAtStr);
+  E("res").addEventListener("mousemove", whenMoveAtRes);
+  E("res").addEventListener("touchmove", whenMoveAtRes);
+  E("str").addEventListener("scroll", function(){
+    if(whereismouse=="res") return;
+    E("res").scrollTop = E("res").scrollHeight*E("str").scrollTop/E("str").scrollHeight;
+    E("res").scrollLeft = E("res").scrollWidth*E("str").scrollLeft/E("str").scrollWidth;
+  });
+  E("res").addEventListener("scroll", function(){
+    if(whereismouse=="str") return;
+    E("str").scrollTop = E("str").scrollHeight*E("res").scrollTop/E("res").scrollHeight;
+    E("str").scrollLeft = E("str").scrollWidth*E("res").scrollLeft/E("res").scrollWidth;
+  });
+
+  function toquadrat(txt){
+    let notes = txt.split(" ").filter((v) => !!v.length);
+    let matrix = [];
+    let notenames = [" c ", "des", " d ", " es", " e ", " f ", "ges", " g ", " as", " a ", " b ", " h "];
+    for(let i=0; i<notes.length; i++){
+      switch(notes[i].toLowerCase()){
+        case "c":
+          notes[i] = 0;
+          break;
+        case "cis":
+          notenames[1] = "cis";
+        case "des":
+          notes[i] = 1;
+          break;
+        case "d":
+          notes[i] = 2;
+          break;
+        case "dis":
+          notenames[3] = "dis";
+        case "es":
+          notes[i] = 3;
+          break;
+        case "e":
+          notes[i] = 4;
+          break;
+        case "f":
+          notes[i] = 5;
+          break;
+        case "fis":
+          notenames[6] = "fis";
+        case "ges":
+          notes[i] = 6;
+          break;
+        case "g":
+          notes[i] = 7;
+          break;
+        case "gis":
+          notenames[8] = "gis";
+        case "as":
+          notes[i] = 8;
+          break;
+        case "a":
+          notes[i] = 9;
+          break;
+        case "ais":
+          notenames[10] = "ais";
+        case "b":
+          notes[i] = 10;
+          break;
+        case "h":
+          notes[i] = 11;
+          break;
+        default:
+          notes[i] = 0;
+      }
+      matrix[i] = [];
+    }
+    for(let i=0; i<notes.length; i++){
+      for(let j=0; j<notes.length; j++){
+        matrix[i][j] = notenames[(notes[j] - notes[i] + notes[0] + 12) % 12];
+      }
+    }
+    return matrix;
+  }
+  function totxt(quad){
+    let txt = [];
+    for(let i=0; i<quad.length; i++){
+      txt[i] = quad[i].join(" ");
+    }
+    return txt.join("\n");
+  }
+  function totable(quad){
+    let txt = [];
+    for(let i=0; i<quad.length; i++){
+      txt[i] = [];
+      for(let j=0; j<quad[i].length; j++){
+        txt[i][j] = quad[i][j].trim();
+      }
+      txt[i] = "<td>"+txt[i].join("<td>");
+    }
+    return "<tr>"+txt.join("<tr>");
+  }
+</script>
+</html>
